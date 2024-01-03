@@ -1,0 +1,136 @@
+[gd_scene load_steps=12 format=3 uid="uid://cm5hmhxn0gbte"]
+
+[ext_resource type="Script" path="res://scripts/camera_movement.gd" id="1_6rh67"]
+[ext_resource type="Script" path="res://scripts/Player.gd" id="2_mcnus"]
+[ext_resource type="Texture2D" uid="uid://cgr6dsek1welf" path="res://placeholders/icon.svg" id="2_pqdpj"]
+[ext_resource type="Script" path="res://TimeLabel.gd" id="4_dw0pt"]
+[ext_resource type="Script" path="res://Time.gd" id="4_h3t6l"]
+[ext_resource type="Script" path="res://TimeManager.gd" id="5_epa1m"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d84jy"]
+size = Vector3(60, 2, 60)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ubyya"]
+size = Vector3(60, 2, 60)
+
+[sub_resource type="Environment" id="Environment_10bd3"]
+background_color = Color(0.239216, 0.239216, 0.239216, 1)
+background_energy_multiplier = 1.51
+ambient_light_source = 2
+ambient_light_color = Color(0.647059, 0.576471, 0.376471, 1)
+ambient_light_energy = 4.04
+
+[sub_resource type="MeshLibrary" id="MeshLibrary_hveb8"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ltjm0"]
+
+[node name="Main" type="Node"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_d84jy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ubyya")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.508726, 0.860929, 0, -0.860929, 0.508726, 0, 13.4197, 5.19997)
+visible = false
+shadow_enabled = true
+
+[node name="View" type="Node3D" parent="."]
+script = ExtResource("1_6rh67")
+
+[node name="Camera" type="Camera3D" parent="View"]
+transform = Transform3D(1, 0, 0, 0, 0.855066, 0.51852, 0, -0.51852, 0.855066, 0, 16, 0)
+environment = SubResource("Environment_10bd3")
+current = true
+
+[node name="Player" type="Node3D" parent="." node_paths=PackedStringArray("selector", "view_camera", "gridmap")]
+script = ExtResource("2_mcnus")
+selector = NodePath("Selector/Sprite3D")
+view_camera = NodePath("../View/Camera")
+gridmap = NodePath("../GridMap")
+
+[node name="Selector" type="Node3D" parent="Player"]
+
+[node name="Sprite3D" type="Sprite3D" parent="Player/Selector"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1, 0)
+texture = ExtResource("2_pqdpj")
+region_rect = Rect2(0, 0, 78, 90)
+
+[node name="GridMap" type="GridMap" parent="."]
+mesh_library = SubResource("MeshLibrary_hveb8")
+physics_material = SubResource("PhysicsMaterial_ltjm0")
+cell_size = Vector3(1, 1, 1)
+
+[node name="Time" type="Node3D" parent="."]
+script = ExtResource("4_h3t6l")
+
+[node name="TimeManager" type="Node3D" parent="."]
+script = ExtResource("5_epa1m")
+baseTime = 1
+
+[node name="MasterTimer" type="Timer" parent="TimeManager"]
+
+[node name="UserInterface" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TimeLabel" type="Label" parent="UserInterface" node_paths=PackedStringArray("TimeManager")]
+layout_mode = 0
+offset_left = 544.0
+offset_top = 594.0
+offset_right = 641.0
+offset_bottom = 617.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "0:1:1:0"
+horizontal_alignment = 1
+script = ExtResource("4_dw0pt")
+TimeManager = NodePath("../../TimeManager")
+
+[node name="PauseButton" type="Button" parent="UserInterface"]
+layout_mode = 0
+offset_left = 455.0
+offset_top = 557.0
+offset_right = 498.0
+offset_bottom = 588.0
+text = "II"
+
+[node name="Play1x" type="Button" parent="UserInterface"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 509.0
+offset_top = 556.0
+offset_right = 528.0
+offset_bottom = 549.0
+grow_horizontal = 2
+grow_vertical = 2
+text = ">"
+
+[node name="Play1-5x" type="Button" parent="UserInterface"]
+layout_mode = 0
+offset_left = 577.0
+offset_top = 554.0
+offset_right = 638.0
+offset_bottom = 589.0
+text = ">>"
+
+[node name="Play2x" type="Button" parent="UserInterface"]
+layout_mode = 0
+offset_left = 651.0
+offset_top = 553.0
+offset_right = 713.0
+offset_bottom = 590.0
+text = ">>>"
+
+[connection signal="button_up" from="UserInterface/PauseButton" to="TimeManager" method="_on_pause_button_button_up"]
+[connection signal="button_up" from="UserInterface/Play1x" to="TimeManager" method="_on_play_1x_button_up"]
+[connection signal="button_up" from="UserInterface/Play1-5x" to="TimeManager" method="_on_play_15x_button_up"]
+[connection signal="button_up" from="UserInterface/Play2x" to="TimeManager" method="_on_play_2x_button_up"]
